@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- <link rel="stylesheet" href="/css/resetstyle.css" /> -->
+    <link rel="stylesheet" href="/css/style.css" />
+    <title>Update User</title>
+  </head>
+  <body>
+    <ul>
+      <li><a href="/">Home</a></li>
+      <li><a href="/create-user">Create User </a></li>
+    </ul>
+
+    <div class="form">
+      <form action="/delete-user" method="POST">
+        <fieldset>
+          <legend>Delete User</legend>
+          <div class="d-none" class="input-group">
+            <label for="">id</label>
+            <input value="<%= userData.id %>" type="text" name="userId" />
+          </div>
+          <div class="input-group">
+            <label for=""> Are you sure delete this user Email</label>
+            <input value="<%= userData.email %>" type="text" name="email" />
+          </div>
+
+          <div>
+            <button>save</button>
+          </div>
+        </fieldset>
+      </form>
+    </div>
+  </body>
+</html>
