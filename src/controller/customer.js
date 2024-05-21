@@ -1,4 +1,5 @@
 const Customer = require("../model/customer");
+const Joi = require("joi");
 const {
   CreateCustomerService,
   CreateManyCustomerService,
@@ -10,25 +11,45 @@ const {
 const UploadSingle = require("../services/FileService");
 const postCreateCustomer = async (req, res) => {
   let { email, phone, address, description, name } = req.body;
-  let imageUrl = "";
-  if (!req.files || Object.keys(req.files).length === 0) {
-  } else {
-    let file = req.files.image;
-    let result = await UploadSingle(file);
-    imageUrl = result.path;
-    let customerData = {
-      email,
-      phone,
-      address,
-      description,
-      name,
-      imageUrl,
-    };
-    let customer = await CreateCustomerService(customerData);
+
+  const schema = Joi.object({
+    name: Joi.string().alphanum().min(3).max(30).required(),
+    address: Joi.string(),
+    phone: Joi.string().pattern(new RegExp("^[0-9]{8,11}$")),
+    description: Joi.string(),
+    email: Joi.string().email({
+      minDomainSegments: 2,
+      tlds: { allow: ["com", "net"] },
+    }),
+  });
+
+  const { error } = schema.validate(req.body, { abortEarly: false });
+  if (error) {
     return res.status(200).json({
-      EC: 0,
+      msg: error,
     });
+  } else {
+    let imageUrl = "";
+    if (!req.files || Object.keys(req.files).length === 0) {
+    } else {
+      let file = req.files.image;
+      let result = await UploadSingle(file);
+      imageUrl = result.path;
+      let customerData = {
+        email,
+        phone,
+        address,
+        description,
+        name,
+        imageUrl,
+      };
+      let customer = await CreateCustomerService(customerData);
+      return res.status(200).json({
+        EC: 0,
+      });
+    }
   }
+
   //   }
 
   // name: { type: String, require: true },
@@ -54,15 +75,20 @@ const postCreateArrayCustomer = async (req, res) => {
   }
 };
 const getAllCustomer = async (req, res) => {
-  let result = await getAllCustomerService();
-  if (result)
+  console.log(req.query.name);
+  let result;
+  if (req.query) {
+    result = await getAllCustomerService(
+      req.query.limit,
+      req.query.page,
+      req.query
+    );
+  } else {
+    result = await getAllCustomerService();
+  }
+  if (result) {
     return res.status(200).json({
       EC: 0,
-      data: result,
-    });
-  else {
-    return res.status(200).json({
-      EC: -1,
       data: result,
     });
   }
